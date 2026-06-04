@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://sryymcdthuonhfupibnl.supabase.co';
-const SUPABASE_ANON_KEY = 'COLE_AQUI_SUA_PUBLISHABLE_KEY';
+const SUPABASE_ANON_KEY = 'sb_publishable_SaHEbcFzUHjzlkUbFO80dw_8j5GPrxu';
 const API_BASE = 'https://pmes-api-gemini.onrender.com';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = (id)=>document.getElementById(id);
