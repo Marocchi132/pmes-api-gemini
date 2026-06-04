@@ -1,1 +1,220 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Redação | PMES Pro</title><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body><div class="page"><div class="box"><div class="top"><h1>Redação</h1><a class="btn outline" href="dashboard.html">Dashboard</a></div><div class="card"><h2 id="tema"></h2><p class="small">Escreva um texto dissertativo-argumentativo. A IA atribuirá nota por competência.</p><textarea id="texto" placeholder="Digite sua redação aqui..."></textarea><button class="btn primary" onclick="corrigir()">Corrigir redação</button><button class="btn outline" onclick="sortear()">Sortear tema</button><p id="msg"></p></div><div id="resultado" class="white" style="display:none"></div></div></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script><script>const temas=['O papel da educação e da família na prevenção da violência urbana','Tecnologia e segurança pública no Brasil contemporâneo','Juventude, vulnerabilidade social e prevenção ao crime','A importância dos direitos humanos na atividade policial','Desinformação nas redes sociais e seus impactos na segurança pública'];let temaAtual='';init();async function init(){await requireLogin();sortear()}function sortear(){temaAtual=temas[Math.floor(Math.random()*temas.length)];tema.textContent=temaAtual}function render(c){resultado.style.display='block';const comp=c.competencias||{};resultado.innerHTML=`<h2>Nota ${c.origem==='ia'?'IA':'local'} ${c.nota_total}/1000</h2><div class="score"><div>C1<b>${comp.norma_culta?.nota||0}</b></div><div>C2<b>${comp.compreensao_tema?.nota||0}</b></div><div>C3<b>${comp.argumentacao?.nota||0}</b></div><div>C4<b>${comp.coesao?.nota||0}</b></div><div>C5<b>${comp.proposta_intervencao?.nota||0}</b></div></div><h3>Diagnóstico</h3><p>${c.diagnostico_geral||''}</p><h3>Sugestões</h3><ul>${(c.sugestoes||[]).map(s=>`<li>${s}</li>`).join('')}</ul>`}async function corrigir(){msg.textContent='Corrigindo...';const correcao=await api('/api/corrigir-redacao',{method:'POST',body:JSON.stringify({tema:temaAtual,redacao:texto.value})});render(correcao);await api('/api/redacoes',{method:'POST',body:JSON.stringify({tema:temaAtual,texto:texto.value,correcao})});msg.textContent='Correção salva no histórico.'}</script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PMES Pro — Redação</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--verde:#1a5c2e;--escuro:#0e3a1c;--dourado:#c9a227;--creme:#f4f0e6;--cinza:#e8e4d9;--erro:#c0392b;--acerto:#1a7a3a;--branco:#fff}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Barlow,sans-serif;background:var(--escuro);color:#1a1a1a;min-height:100vh}.screen{min-height:100vh;padding:2rem;background:radial-gradient(ellipse at 20% 50%,rgba(26,92,46,.7),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,162,39,.18),transparent 50%),var(--escuro);display:flex;align-items:center;justify-content:center}.box{max-width:980px;width:100%;color:#fff}.topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}.brand{font:800 1.5rem 'Barlow Condensed';letter-spacing:2px;color:var(--dourado);text-transform:uppercase}.nav a,.btn{border:0;border-radius:6px;cursor:pointer;text-transform:uppercase;font:800 1rem 'Barlow Condensed';letter-spacing:2px;padding:.85rem 1.2rem;margin:.25rem;text-decoration:none;display:inline-block}.outline{background:transparent;color:white;border:2px solid rgba(255,255,255,.35)}.primary{background:linear-gradient(135deg,var(--dourado),#a07a10);color:var(--escuro)}.danger{background:var(--erro);color:#fff}.card{background:rgba(255,255,255,.08);border:1px solid rgba(201,162,39,.35);border-radius:14px;padding:1.3rem;margin:1rem 0}.label{font-weight:700;color:var(--dourado);text-transform:uppercase;letter-spacing:1px;font-size:.9rem}.tema{font:800 2rem/1.1 'Barlow Condensed';color:var(--dourado);text-transform:uppercase;margin:.7rem 0 1rem}textarea,input{width:100%;padding:1rem;border-radius:10px;border:0;font-family:Barlow,sans-serif;font-size:1rem;margin-top:.5rem}textarea{min-height:360px;line-height:1.65;resize:vertical}.muted{color:#ffffffb5;line-height:1.6}.status{margin-top:1rem;padding:1rem;border-radius:10px;display:none}.status.ok{display:block;background:#d4edda;color:#155724;border-left:4px solid var(--acerto)}.status.err{display:block;background:#fde8e8;color:#7b0000;border-left:4px solid var(--erro)}.resultado{display:none;background:#fff;color:#222;border-radius:14px;padding:1.3rem;margin-top:1rem;line-height:1.6}.score{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin:1rem 0}.score div{background:var(--creme);border-radius:10px;text-align:center;padding:.8rem}.score b{display:block;color:var(--verde);font:800 1.8rem 'Barlow Condensed'}ul{margin-left:1.2rem}.nota-final{font:800 3.5rem/1 'Barlow Condensed';color:var(--verde);margin:.5rem 0}.loader{display:none;color:var(--dourado);font-weight:700;margin-top:1rem}@media(max-width:700px){.topbar{flex-direction:column;align-items:flex-start}.score{grid-template-columns:1fr}.tema{font-size:1.5rem}.screen{padding:1rem}.nav a,.btn{width:100%;text-align:center}}
+  </style>
+</head>
+<body>
+  <main class="screen">
+    <section class="box">
+      <div class="topbar">
+        <div class="brand">PMES Pro · Redação</div>
+        <div class="nav">
+          <a class="outline" href="dashboard.html">Dashboard</a>
+          <a class="outline" href="historico.html">Histórico</a>
+          <a class="outline" href="simulado.html">Simulado</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Tema sorteado</div>
+        <div class="tema" id="tema">Carregando tema...</div>
+        <p class="muted">Escreva uma redação dissertativo-argumentativa. Ao corrigir, o sistema enviará o texto para a IA e salvará automaticamente o resultado no histórico do aluno.</p>
+        <button class="btn outline" id="btnTema">Sortear outro tema</button>
+      </div>
+
+      <div class="card">
+        <div class="label">Sua redação</div>
+        <textarea id="texto" placeholder="Digite sua redação aqui..."></textarea>
+        <div>
+          <button class="btn primary" id="btnCorrigir">Corrigir e salvar redação</button>
+          <button class="btn outline" id="btnLimpar">Limpar texto</button>
+        </div>
+        <div class="loader" id="loader">Corrigindo com IA e salvando no histórico...</div>
+        <div class="status" id="status"></div>
+      </div>
+
+      <div class="resultado" id="resultadoBox">
+        <div class="label" style="color:#795c00">Resultado da correção</div>
+        <div class="nota-final" id="notaFinal">0/1000</div>
+        <div class="score" id="competencias"></div>
+        <h3>Comentário geral</h3>
+        <p id="comentario"></p>
+        <h3 style="margin-top:1rem">Erros e pontos de atenção</h3>
+        <ul id="erros"></ul>
+        <h3 style="margin-top:1rem">Sugestões de melhoria</h3>
+        <ul id="sugestoes"></ul>
+      </div>
+    </section>
+  </main>
+
+<script>
+const API_BASE = 'https://pmes-api-gemini.onrender.com';
+
+const temas = [
+  'O papel da tecnologia no fortalecimento da segurança pública no Brasil',
+  'Desafios do combate à violência urbana nas cidades brasileiras',
+  'A importância da ética na atuação dos agentes de segurança pública',
+  'Educação, cidadania e prevenção da criminalidade entre jovens',
+  'O impacto da desinformação nas redes sociais para a segurança coletiva',
+  'Segurança pública e respeito aos direitos fundamentais no Estado Democrático de Direito',
+  'A participação da comunidade na construção de políticas de segurança eficazes',
+  'Mobilidade urbana, desigualdade social e prevenção da violência',
+  'O uso de câmeras e dados digitais na atividade policial: benefícios e limites',
+  'A valorização da formação continuada dos profissionais de segurança pública'
+];
+
+let temaAtual = '';
+
+function alunoToken(){
+  return localStorage.getItem('pmes_token') ||
+         localStorage.getItem('token') ||
+         localStorage.getItem('access_token') ||
+         sessionStorage.getItem('pmes_token') ||
+         sessionStorage.getItem('token') || '';
+}
+
+function protegerPagina(){
+  const token = alunoToken();
+  if(!token){
+    alert('Faça login para acessar a redação.');
+    location.href = 'login.html';
+  }
+}
+
+function sortearTema(){
+  temaAtual = temas[Math.floor(Math.random()*temas.length)];
+  document.getElementById('tema').textContent = temaAtual;
+}
+
+function setStatus(msg, tipo='ok'){
+  const el = document.getElementById('status');
+  el.className = 'status ' + (tipo === 'err' ? 'err' : 'ok');
+  el.textContent = msg;
+}
+
+function normalizarResultado(data){
+  const r = data?.resultado || data?.correcao || data || {};
+  const nota = Number(r.nota_final ?? r.nota ?? r.total ?? data?.nota ?? 0) || 0;
+  const competencias = r.competencias || {
+    c1: r.competencia1 ?? r.c1 ?? 0,
+    c2: r.competencia2 ?? r.c2 ?? 0,
+    c3: r.competencia3 ?? r.c3 ?? 0,
+    c4: r.competencia4 ?? r.c4 ?? 0,
+    c5: r.competencia5 ?? r.c5 ?? 0
+  };
+  return {
+    nota,
+    competencias,
+    comentario: r.comentario_geral || r.comentario || r.feedback || r.analise_geral || 'Correção realizada com sucesso.',
+    erros: r.erros || r.problemas || r.pontos_atencao || [],
+    sugestoes: r.sugestoes || r.melhorias || r.recomendacoes || [],
+    raw: r
+  };
+}
+
+function listaHtml(arr){
+  if(!Array.isArray(arr)) arr = [String(arr || 'Nenhum ponto informado.')];
+  if(arr.length === 0) arr = ['Nenhum ponto informado.'];
+  return arr.map(x => '<li>' + String(x).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) + '</li>').join('');
+}
+
+function mostrarResultado(r){
+  document.getElementById('resultadoBox').style.display = 'block';
+  document.getElementById('notaFinal').textContent = `${r.nota}/1000`;
+  const comps = r.competencias || {};
+  const vals = [
+    ['C1', comps.c1 ?? comps.competencia1 ?? 0],
+    ['C2', comps.c2 ?? comps.competencia2 ?? 0],
+    ['C3', comps.c3 ?? comps.competencia3 ?? 0],
+    ['C4', comps.c4 ?? comps.competencia4 ?? 0],
+    ['C5', comps.c5 ?? comps.competencia5 ?? 0]
+  ];
+  document.getElementById('competencias').innerHTML = vals.map(([k,v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('');
+  document.getElementById('comentario').textContent = r.comentario;
+  document.getElementById('erros').innerHTML = listaHtml(r.erros);
+  document.getElementById('sugestoes').innerHTML = listaHtml(r.sugestoes);
+}
+
+async function corrigirRedacao(){
+  const token = alunoToken();
+  const texto = document.getElementById('texto').value.trim();
+
+  if(!token){
+    setStatus('Você precisa estar logado para corrigir e salvar a redação.', 'err');
+    return;
+  }
+  if(texto.length < 400){
+    setStatus('Escreva uma redação maior antes de corrigir. Recomendado: pelo menos 400 caracteres.', 'err');
+    return;
+  }
+
+  const loader = document.getElementById('loader');
+  loader.style.display = 'block';
+  document.getElementById('btnCorrigir').disabled = true;
+  document.getElementById('resultadoBox').style.display = 'none';
+
+  try{
+    const resp = await fetch(API_BASE + '/api/corrigir-redacao', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer ' + token
+      },
+      body: JSON.stringify({ tema: temaAtual, texto })
+    });
+
+    const data = await resp.json().catch(() => ({}));
+    if(!resp.ok){
+      throw new Error(data.error || 'Erro ao corrigir redação.');
+    }
+
+    const resultadoNormalizado = normalizarResultado(data);
+    mostrarResultado(resultadoNormalizado);
+
+    const salvarResp = await fetch(API_BASE + '/api/redacoes', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer ' + token
+      },
+      body: JSON.stringify({
+        tema: temaAtual,
+        texto,
+        nota: resultadoNormalizado.nota,
+        resultado: resultadoNormalizado.raw
+      })
+    });
+
+    const salvarTxt = await salvarResp.text();
+    console.log('REDACAO SALVAR:', salvarResp.status, salvarTxt);
+
+    if(!salvarResp.ok){
+      setStatus('Redação corrigida, mas não foi salva no histórico: ' + salvarTxt, 'err');
+      return;
+    }
+
+    setStatus('Redação corrigida e salva no histórico com sucesso!', 'ok');
+  }catch(e){
+    console.error(e);
+    setStatus(e.message || 'Erro ao corrigir/salvar redação.', 'err');
+  }finally{
+    loader.style.display = 'none';
+    document.getElementById('btnCorrigir').disabled = false;
+  }
+}
+
+document.getElementById('btnTema').addEventListener('click', sortearTema);
+document.getElementById('btnLimpar').addEventListener('click', () => { document.getElementById('texto').value = ''; });
+document.getElementById('btnCorrigir').addEventListener('click', corrigirRedacao);
+
+protegerPagina();
+sortearTema();
+</script>
+</body>
+</html>
