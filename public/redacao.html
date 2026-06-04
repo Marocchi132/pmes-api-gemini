@@ -2,162 +2,194 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PMES Pro — Redação</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--verde:#1a5c2e;--escuro:#0e3a1c;--dourado:#c9a227;--creme:#f4f0e6;--cinza:#e8e4d9;--erro:#c0392b;--acerto:#1a7a3a;--branco:#fff}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Barlow,sans-serif;background:var(--escuro);color:#1a1a1a;min-height:100vh}.screen{min-height:100vh;padding:2rem;background:radial-gradient(ellipse at 20% 50%,rgba(26,92,46,.7),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,162,39,.18),transparent 50%),var(--escuro);display:flex;align-items:center;justify-content:center}.box{max-width:980px;width:100%;color:#fff}.topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}.brand{font:800 1.5rem 'Barlow Condensed';letter-spacing:2px;color:var(--dourado);text-transform:uppercase}.nav a,.btn{border:0;border-radius:6px;cursor:pointer;text-transform:uppercase;font:800 1rem 'Barlow Condensed';letter-spacing:2px;padding:.85rem 1.2rem;margin:.25rem;text-decoration:none;display:inline-block}.outline{background:transparent;color:white;border:2px solid rgba(255,255,255,.35)}.primary{background:linear-gradient(135deg,var(--dourado),#a07a10);color:var(--escuro)}.danger{background:var(--erro);color:#fff}.card{background:rgba(255,255,255,.08);border:1px solid rgba(201,162,39,.35);border-radius:14px;padding:1.3rem;margin:1rem 0}.label{font-weight:700;color:var(--dourado);text-transform:uppercase;letter-spacing:1px;font-size:.9rem}.tema{font:800 2rem/1.1 'Barlow Condensed';color:var(--dourado);text-transform:uppercase;margin:.7rem 0 1rem}textarea,input{width:100%;padding:1rem;border-radius:10px;border:0;font-family:Barlow,sans-serif;font-size:1rem;margin-top:.5rem}textarea{min-height:360px;line-height:1.65;resize:vertical}.muted{color:#ffffffb5;line-height:1.6}.status{margin-top:1rem;padding:1rem;border-radius:10px;display:none}.status.ok{display:block;background:#d4edda;color:#155724;border-left:4px solid var(--acerto)}.status.err{display:block;background:#fde8e8;color:#7b0000;border-left:4px solid var(--erro)}.resultado{display:none;background:#fff;color:#222;border-radius:14px;padding:1.3rem;margin-top:1rem;line-height:1.6}.score{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin:1rem 0}.score div{background:var(--creme);border-radius:10px;text-align:center;padding:.8rem}.score b{display:block;color:var(--verde);font:800 1.8rem 'Barlow Condensed'}ul{margin-left:1.2rem}.nota-final{font:800 3.5rem/1 'Barlow Condensed';color:var(--verde);margin:.5rem 0}.loader{display:none;color:var(--dourado);font-weight:700;margin-top:1rem}@media(max-width:700px){.topbar{flex-direction:column;align-items:flex-start}.score{grid-template-columns:1fr}.tema{font-size:1.5rem}.screen{padding:1rem}.nav a,.btn{width:100%;text-align:center}}
+    :root{--verde:#1a5c2e;--escuro:#0e3a1c;--dourado:#c9a227;--creme:#f4f0e6;--cinza:#e8e4d9;--erro:#c0392b;--acerto:#1a7a3a;--branco:#fff}
+    *{box-sizing:border-box;margin:0;padding:0}body{font-family:Barlow,sans-serif;background:var(--escuro);color:#1a1a1a;min-height:100vh}.screen{min-height:100vh;padding:2rem;background:radial-gradient(ellipse at 20% 50%,rgba(26,92,46,.72),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,162,39,.18),transparent 50%),var(--escuro);display:flex;justify-content:center;align-items:flex-start}.box{max-width:980px;width:100%;color:#fff}.top{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin-bottom:1rem}.logo{font:800 2rem 'Barlow Condensed';color:var(--dourado);letter-spacing:2px;text-transform:uppercase}.nav a{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.28);border-radius:6px;padding:.55rem .8rem;margin-left:.35rem;font:700 .9rem 'Barlow Condensed';letter-spacing:1px;text-transform:uppercase}.card{background:rgba(255,255,255,.075);border:1px solid rgba(201,162,39,.35);border-radius:14px;padding:1.3rem;margin:1rem 0}.tema{font:800 1.8rem 'Barlow Condensed';color:var(--dourado);text-transform:uppercase;line-height:1.1;margin:.5rem 0 1rem}.muted{color:rgba(255,255,255,.72);line-height:1.55}.btn{border:0;border-radius:6px;cursor:pointer;text-transform:uppercase;font:800 1rem 'Barlow Condensed';letter-spacing:1.5px;padding:.9rem 1.3rem;margin:.45rem .35rem .45rem 0}.primary{background:linear-gradient(135deg,var(--dourado),#a07a10);color:var(--escuro)}.outline{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.35)}.danger{background:#7b1f1f;color:#fff}textarea{width:100%;min-height:360px;border:0;border-radius:10px;padding:1rem;font:400 1rem/1.65 Barlow,sans-serif;margin-top:1rem;resize:vertical}.rel{display:none;background:#fff;color:#222;border-radius:12px;padding:1.2rem;margin-top:1rem;line-height:1.6}.score{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin:1rem 0}.score div{background:var(--creme);border-radius:8px;text-align:center;padding:.75rem}.score b{display:block;color:var(--verde);font:800 1.7rem 'Barlow Condensed'}.erro{display:none;background:#fde8e8;color:#7b0000;border-left:4px solid var(--erro);border-radius:8px;padding:1rem;margin-top:1rem}.okmsg{display:none;background:#d4edda;color:#155724;border-left:4px solid var(--acerto);border-radius:8px;padding:1rem;margin-top:1rem}.loading{opacity:.7;pointer-events:none}@media(max-width:720px){.top{align-items:flex-start;flex-direction:column}.nav a{display:inline-block;margin:.2rem .2rem}.score{grid-template-columns:1fr}.logo{font-size:1.55rem}}
   </style>
 </head>
 <body>
   <main class="screen">
-    <section class="box">
-      <div class="topbar">
-        <div class="brand">PMES Pro · Redação</div>
+    <div class="box">
+      <div class="top">
+        <div class="logo">PMES Pro — Redação</div>
         <div class="nav">
-          <a class="outline" href="dashboard.html">Dashboard</a>
-          <a class="outline" href="historico.html">Histórico</a>
-          <a class="outline" href="simulado.html">Simulado</a>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="historico.html">Histórico</a>
+          <a href="simulado.html">Simulado</a>
+          <a href="login.html" id="sair">Sair</a>
         </div>
       </div>
 
-      <div class="card">
-        <div class="label">Tema sorteado</div>
-        <div class="tema" id="tema">Carregando tema...</div>
-        <p class="muted">Escreva uma redação dissertativo-argumentativa. Ao corrigir, o sistema enviará o texto para a IA e salvará automaticamente o resultado no histórico do aluno.</p>
-        <button class="btn outline" id="btnTema">Sortear outro tema</button>
-      </div>
-
-      <div class="card">
-        <div class="label">Sua redação</div>
-        <textarea id="texto" placeholder="Digite sua redação aqui..."></textarea>
-        <div>
-          <button class="btn primary" id="btnCorrigir">Corrigir e salvar redação</button>
-          <button class="btn outline" id="btnLimpar">Limpar texto</button>
-        </div>
-        <div class="loader" id="loader">Corrigindo com IA e salvando no histórico...</div>
-        <div class="status" id="status"></div>
-      </div>
-
-      <div class="resultado" id="resultadoBox">
-        <div class="label" style="color:#795c00">Resultado da correção</div>
-        <div class="nota-final" id="notaFinal">0/1000</div>
-        <div class="score" id="competencias"></div>
-        <h3>Comentário geral</h3>
-        <p id="comentario"></p>
-        <h3 style="margin-top:1rem">Erros e pontos de atenção</h3>
-        <ul id="erros"></ul>
-        <h3 style="margin-top:1rem">Sugestões de melhoria</h3>
-        <ul id="sugestoes"></ul>
-      </div>
-    </section>
+      <section class="card">
+        <p class="muted"><b>Treine sua redação discursiva.</b> O sistema sorteia um tema, envia sua produção para correção por IA e salva o resultado no histórico do aluno.</p>
+        <div class="tema" id="tema"></div>
+        <button class="btn outline" id="sortear">Sortear tema</button>
+        <button class="btn danger" id="limpar">Limpar texto</button>
+        <textarea id="texto" placeholder="Digite sua redação aqui. Recomenda-se produzir entre 20 e 30 linhas, com introdução, desenvolvimento e conclusão."></textarea>
+        <button class="btn primary" id="corrigir">Corrigir redação</button>
+        <div class="erro" id="erro"></div>
+        <div class="okmsg" id="okmsg"></div>
+        <div class="rel" id="rel"></div>
+      </section>
+    </div>
   </main>
 
 <script>
 const API_BASE = 'https://pmes-api-gemini.onrender.com';
+const SUPABASE_PROJECT_REF = 'sryymcdthuonhfupibnl';
+const AUTH_KEY = `sb-${SUPABASE_PROJECT_REF}-auth-token`;
 
 const temas = [
   'O papel da tecnologia no fortalecimento da segurança pública no Brasil',
-  'Desafios do combate à violência urbana nas cidades brasileiras',
-  'A importância da ética na atuação dos agentes de segurança pública',
-  'Educação, cidadania e prevenção da criminalidade entre jovens',
-  'O impacto da desinformação nas redes sociais para a segurança coletiva',
-  'Segurança pública e respeito aos direitos fundamentais no Estado Democrático de Direito',
-  'A participação da comunidade na construção de políticas de segurança eficazes',
-  'Mobilidade urbana, desigualdade social e prevenção da violência',
-  'O uso de câmeras e dados digitais na atividade policial: benefícios e limites',
-  'A valorização da formação continuada dos profissionais de segurança pública'
+  'Desafios da atuação policial diante da proteção dos direitos fundamentais',
+  'Violência urbana e responsabilidade compartilhada entre Estado e sociedade',
+  'A importância da prevenção no enfrentamento da criminalidade juvenil',
+  'Desinformação nas redes sociais e seus impactos na segurança pública',
+  'Valorização profissional e eficiência das instituições policiais',
+  'Educação, cidadania e redução da violência no espaço urbano',
+  'O uso de câmeras corporais e transparência na atividade policial',
+  'Mobilidade urbana, desigualdade territorial e policiamento preventivo',
+  'Segurança pública e respeito à dignidade da pessoa humana'
 ];
 
 let temaAtual = '';
 
-function alunoToken(){
-  return localStorage.getItem('pmes_token') ||
-         localStorage.getItem('token') ||
-         localStorage.getItem('access_token') ||
-         sessionStorage.getItem('pmes_token') ||
-         sessionStorage.getItem('token') || '';
+function tokenSupabase(){
+  try{
+    const raw = localStorage.getItem(AUTH_KEY);
+    if(raw){
+      const data = JSON.parse(raw);
+      return data.access_token || data.currentSession?.access_token || data.session?.access_token || '';
+    }
+  }catch(e){ console.warn('Falha lendo token padrão Supabase:', e); }
+
+  const possibleKeys = ['pmes_token','token','access_token','supabase.auth.token'];
+  for(const key of possibleKeys){
+    try{
+      const raw = localStorage.getItem(key);
+      if(!raw) continue;
+      if(raw.startsWith('ey')) return raw;
+      const data = JSON.parse(raw);
+      const token = data.access_token || data.currentSession?.access_token || data.session?.access_token;
+      if(token) return token;
+    }catch(e){}
+  }
+
+  for(let i=0;i<localStorage.length;i++){
+    const key = localStorage.key(i);
+    if(!key || !key.includes('auth-token')) continue;
+    try{
+      const data = JSON.parse(localStorage.getItem(key));
+      const token = data.access_token || data.currentSession?.access_token || data.session?.access_token;
+      if(token) return token;
+    }catch(e){}
+  }
+
+  return '';
 }
 
-function protegerPagina(){
-  const token = alunoToken();
+function exigirLogin(){
+  const token = tokenSupabase();
   if(!token){
-    alert('Faça login para acessar a redação.');
-    location.href = 'login.html';
+    alert('Sua sessão não foi encontrada. Faça login novamente.');
+    window.location.href = 'login.html';
+    return '';
   }
+  return token;
 }
 
 function sortearTema(){
   temaAtual = temas[Math.floor(Math.random()*temas.length)];
   document.getElementById('tema').textContent = temaAtual;
+  localStorage.setItem('pmes_redacao_tema', temaAtual);
 }
 
-function setStatus(msg, tipo='ok'){
-  const el = document.getElementById('status');
-  el.className = 'status ' + (tipo === 'err' ? 'err' : 'ok');
-  el.textContent = msg;
+function carregarRascunho(){
+  temaAtual = localStorage.getItem('pmes_redacao_tema') || '';
+  if(!temaAtual) sortearTema();
+  else document.getElementById('tema').textContent = temaAtual;
+  document.getElementById('texto').value = localStorage.getItem('pmes_redacao_texto') || '';
 }
 
-function normalizarResultado(data){
-  const r = data?.resultado || data?.correcao || data || {};
-  const nota = Number(r.nota_final ?? r.nota ?? r.total ?? data?.nota ?? 0) || 0;
-  const competencias = r.competencias || {
-    c1: r.competencia1 ?? r.c1 ?? 0,
-    c2: r.competencia2 ?? r.c2 ?? 0,
-    c3: r.competencia3 ?? r.c3 ?? 0,
-    c4: r.competencia4 ?? r.c4 ?? 0,
-    c5: r.competencia5 ?? r.c5 ?? 0
-  };
-  return {
-    nota,
-    competencias,
-    comentario: r.comentario_geral || r.comentario || r.feedback || r.analise_geral || 'Correção realizada com sucesso.',
-    erros: r.erros || r.problemas || r.pontos_atencao || [],
-    sugestoes: r.sugestoes || r.melhorias || r.recomendacoes || [],
-    raw: r
-  };
+function numero(n){
+  const v = Number(n);
+  return Number.isFinite(v) ? v : 0;
 }
 
-function listaHtml(arr){
-  if(!Array.isArray(arr)) arr = [String(arr || 'Nenhum ponto informado.')];
-  if(arr.length === 0) arr = ['Nenhum ponto informado.'];
-  return arr.map(x => '<li>' + String(x).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) + '</li>').join('');
+function renderResultado(r){
+  const nota = numero(r.nota ?? r.nota_final ?? r.notaTotal ?? r.total);
+  const c1 = numero(r.competencia1 ?? r.c1);
+  const c2 = numero(r.competencia2 ?? r.c2);
+  const c3 = numero(r.competencia3 ?? r.c3);
+  const c4 = numero(r.competencia4 ?? r.c4);
+  const c5 = numero(r.competencia5 ?? r.c5);
+  const erros = Array.isArray(r.erros) ? r.erros : [];
+  const sugestoes = Array.isArray(r.sugestoes) ? r.sugestoes : [];
+  const comentario = r.comentario_geral || r.comentario || r.feedback || r.analise || 'Correção concluída.';
+
+  document.getElementById('rel').style.display = 'block';
+  document.getElementById('rel').innerHTML = `
+    <h2>Resultado da Correção</h2>
+    <p><b>Nota final:</b> ${nota}/1000</p>
+    <div class="score">
+      <div><span>C1</span><b>${c1}</b></div>
+      <div><span>C2</span><b>${c2}</b></div>
+      <div><span>C3</span><b>${c3}</b></div>
+      <div><span>C4</span><b>${c4}</b></div>
+      <div><span>C5</span><b>${c5}</b></div>
+    </div>
+    <h3>Comentário geral</h3>
+    <p>${comentario}</p>
+    <h3>Erros identificados</h3>
+    ${erros.length ? `<ul>${erros.map(e=>`<li>${typeof e==='string'?e:(e.trecho?`<b>${e.trecho}</b>: '') + ' ' + (e.comentario || e.problema || '')}</li>`).join('')}</ul>` : '<p>Nenhum erro específico listado pela IA.</p>'}
+    <h3>Sugestões de melhoria</h3>
+    ${sugestoes.length ? `<ul>${sugestoes.map(s=>`<li>${typeof s==='string'?s:(s.sugestao || s.comentario || JSON.stringify(s))}</li>`).join('')}</ul>` : '<p>Nenhuma sugestão específica listada pela IA.</p>'}
+  `;
 }
 
-function mostrarResultado(r){
-  document.getElementById('resultadoBox').style.display = 'block';
-  document.getElementById('notaFinal').textContent = `${r.nota}/1000`;
-  const comps = r.competencias || {};
-  const vals = [
-    ['C1', comps.c1 ?? comps.competencia1 ?? 0],
-    ['C2', comps.c2 ?? comps.competencia2 ?? 0],
-    ['C3', comps.c3 ?? comps.competencia3 ?? 0],
-    ['C4', comps.c4 ?? comps.competencia4 ?? 0],
-    ['C5', comps.c5 ?? comps.competencia5 ?? 0]
-  ];
-  document.getElementById('competencias').innerHTML = vals.map(([k,v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('');
-  document.getElementById('comentario').textContent = r.comentario;
-  document.getElementById('erros').innerHTML = listaHtml(r.erros);
-  document.getElementById('sugestoes').innerHTML = listaHtml(r.sugestoes);
+async function salvarRedacao(token, texto, resultado){
+  const nota = numero(resultado.nota ?? resultado.nota_final ?? resultado.notaTotal ?? resultado.total);
+  const resp = await fetch(API_BASE + '/api/redacoes', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer ' + token
+    },
+    body: JSON.stringify({
+      tema: temaAtual,
+      texto,
+      nota,
+      resultado
+    })
+  });
+  const txt = await resp.text();
+  console.log('REDACAO SAVE:', resp.status, txt);
+  if(!resp.ok) throw new Error(txt || 'Falha ao salvar redação.');
+  return txt ? JSON.parse(txt) : {};
 }
 
 async function corrigirRedacao(){
-  const token = alunoToken();
+  const erro = document.getElementById('erro');
+  const okmsg = document.getElementById('okmsg');
+  erro.style.display = 'none';
+  okmsg.style.display = 'none';
+
+  const token = exigirLogin();
+  if(!token) return;
+
   const texto = document.getElementById('texto').value.trim();
-
-  if(!token){
-    setStatus('Você precisa estar logado para corrigir e salvar a redação.', 'err');
-    return;
-  }
-  if(texto.length < 400){
-    setStatus('Escreva uma redação maior antes de corrigir. Recomendado: pelo menos 400 caracteres.', 'err');
+  if(texto.length < 200){
+    erro.textContent = 'Escreva uma redação maior antes de corrigir. Use pelo menos 200 caracteres.';
+    erro.style.display = 'block';
     return;
   }
 
-  const loader = document.getElementById('loader');
-  loader.style.display = 'block';
-  document.getElementById('btnCorrigir').disabled = true;
-  document.getElementById('resultadoBox').style.display = 'none';
+  const btn = document.getElementById('corrigir');
+  btn.classList.add('loading');
+  btn.textContent = 'Corrigindo...';
 
   try{
     const resp = await fetch(API_BASE + '/api/corrigir-redacao', {
@@ -166,55 +198,41 @@ async function corrigirRedacao(){
         'Content-Type':'application/json',
         'Authorization':'Bearer ' + token
       },
-      body: JSON.stringify({ tema: temaAtual, texto })
+      body: JSON.stringify({ tema: temaAtual, redacao: texto, texto })
     });
 
-    const data = await resp.json().catch(() => ({}));
-    if(!resp.ok){
-      throw new Error(data.error || 'Erro ao corrigir redação.');
-    }
+    const raw = await resp.text();
+    console.log('REDACAO IA:', resp.status, raw);
+    if(!resp.ok) throw new Error(raw || 'Falha na correção por IA.');
 
-    const resultadoNormalizado = normalizarResultado(data);
-    mostrarResultado(resultadoNormalizado);
+    let resultado;
+    try{ resultado = JSON.parse(raw); }catch(e){ resultado = { nota:0, comentario: raw, resultado_bruto: raw }; }
+    if(resultado.resultado && typeof resultado.resultado === 'object') resultado = resultado.resultado;
 
-    const salvarResp = await fetch(API_BASE + '/api/redacoes', {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':'Bearer ' + token
-      },
-      body: JSON.stringify({
-        tema: temaAtual,
-        texto,
-        nota: resultadoNormalizado.nota,
-        resultado: resultadoNormalizado.raw
-      })
-    });
+    renderResultado(resultado);
+    await salvarRedacao(token, texto, resultado);
 
-    const salvarTxt = await salvarResp.text();
-    console.log('REDACAO SALVAR:', salvarResp.status, salvarTxt);
-
-    if(!salvarResp.ok){
-      setStatus('Redação corrigida, mas não foi salva no histórico: ' + salvarTxt, 'err');
-      return;
-    }
-
-    setStatus('Redação corrigida e salva no histórico com sucesso!', 'ok');
+    localStorage.removeItem('pmes_redacao_texto');
+    okmsg.textContent = 'Redação corrigida e salva no histórico com sucesso.';
+    okmsg.style.display = 'block';
   }catch(e){
     console.error(e);
-    setStatus(e.message || 'Erro ao corrigir/salvar redação.', 'err');
+    erro.textContent = 'Erro ao corrigir ou salvar a redação: ' + (e.message || e);
+    erro.style.display = 'block';
   }finally{
-    loader.style.display = 'none';
-    document.getElementById('btnCorrigir').disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = 'Corrigir redação';
   }
 }
 
-document.getElementById('btnTema').addEventListener('click', sortearTema);
-document.getElementById('btnLimpar').addEventListener('click', () => { document.getElementById('texto').value = ''; });
-document.getElementById('btnCorrigir').addEventListener('click', corrigirRedacao);
+document.getElementById('sortear').addEventListener('click', sortearTema);
+document.getElementById('limpar').addEventListener('click', ()=>{ document.getElementById('texto').value=''; localStorage.removeItem('pmes_redacao_texto'); });
+document.getElementById('corrigir').addEventListener('click', corrigirRedacao);
+document.getElementById('texto').addEventListener('input', e=>localStorage.setItem('pmes_redacao_texto', e.target.value));
+document.getElementById('sair').addEventListener('click', ()=>{ localStorage.removeItem(AUTH_KEY); });
 
-protegerPagina();
-sortearTema();
+carregarRascunho();
+exigirLogin();
 </script>
 </body>
 </html>
