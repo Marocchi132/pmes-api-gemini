@@ -119,6 +119,28 @@ function numero(n){
   return Number.isFinite(v) ? v : 0;
 }
 
+function escapeHTML(value){
+  return String(value ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#039;');
+}
+
+function itemErro(e){
+  if(typeof e === 'string') return `<li>${escapeHTML(e)}</li>`;
+  const trecho = e?.trecho ? `<b>${escapeHTML(e.trecho)}</b> — ` : '';
+  const msg = e?.comentario || e?.problema || e?.erro || JSON.stringify(e);
+  return `<li>${trecho}${escapeHTML(msg)}</li>`;
+}
+
+function itemSugestao(s){
+  if(typeof s === 'string') return `<li>${escapeHTML(s)}</li>`;
+  const msg = s?.sugestao || s?.comentario || s?.melhoria || JSON.stringify(s);
+  return `<li>${escapeHTML(msg)}</li>`;
+}
+
 function renderResultado(r){
   const nota = numero(r.nota ?? r.nota_final ?? r.notaTotal ?? r.total);
   const c1 = numero(r.competencia1 ?? r.c1);
@@ -129,6 +151,14 @@ function renderResultado(r){
   const erros = Array.isArray(r.erros) ? r.erros : [];
   const sugestoes = Array.isArray(r.sugestoes) ? r.sugestoes : [];
   const comentario = r.comentario_geral || r.comentario || r.feedback || r.analise || 'Correção concluída.';
+
+  const errosHTML = erros.length
+    ? `<ul>${erros.map(itemErro).join('')}</ul>`
+    : '<p>Nenhum erro específico listado pela IA.</p>';
+
+  const sugestoesHTML = sugestoes.length
+    ? `<ul>${sugestoes.map(itemSugestao).join('')}</ul>`
+    : '<p>Nenhuma sugestão específica listada pela IA.</p>';
 
   document.getElementById('rel').style.display = 'block';
   document.getElementById('rel').innerHTML = `
@@ -142,11 +172,11 @@ function renderResultado(r){
       <div><span>C5</span><b>${c5}</b></div>
     </div>
     <h3>Comentário geral</h3>
-    <p>${comentario}</p>
+    <p>${escapeHTML(comentario)}</p>
     <h3>Erros identificados</h3>
-    ${erros.length ? `<ul>${erros.map(e=>`<li>${typeof e==='string'?e:(e.trecho?`<b>${e.trecho}</b>: '') + ' ' + (e.comentario || e.problema || '')}</li>`).join('')}</ul>` : '<p>Nenhum erro específico listado pela IA.</p>'}
+    ${errosHTML}
     <h3>Sugestões de melhoria</h3>
-    ${sugestoes.length ? `<ul>${sugestoes.map(s=>`<li>${typeof s==='string'?s:(s.sugestao || s.comentario || JSON.stringify(s))}</li>`).join('')}</ul>` : '<p>Nenhuma sugestão específica listada pela IA.</p>'}
+    ${sugestoesHTML}
   `;
 }
 
