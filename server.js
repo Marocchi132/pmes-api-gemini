@@ -1,150 +1,104 @@
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
+import { createClient } from '@supabase/supabase-js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-app.use(express.json({ limit: '120kb' }));
+app.use(cors());
+app.use(express.json({ limit: '200kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const competenciaSchema = {
-  type: Type.OBJECT,
-  properties: {
-    nome: { type: Type.STRING },
-    nota: { type: Type.INTEGER },
-    comentario: { type: Type.STRING }
-  },
-  required: ['nome', 'nota', 'comentario']
-};
+const gemini = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
+const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const supabaseAdmin = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null;
 
-const erroSchema = {
-  type: Type.OBJECT,
-  properties: {
-    trecho: { type: Type.STRING },
-    problema: { type: Type.STRING },
-    sugestao: { type: Type.STRING }
-  },
-  required: ['trecho', 'problema', 'sugestao']
-};
-
-const schema = {
-  type: Type.OBJECT,
-  properties: {
-    nota_total: { type: Type.INTEGER },
-    diagnostico_geral: { type: Type.STRING },
+function localCorrection(texto, tema) {
+  const palavras = (texto.match(/[\p{L}\p{N}]+/gu) || []).length;
+  const nota = Math.max(360, Math.min(760, 350 + palavras));
+  return {
+    origem: 'local', nota_total: nota,
     competencias: {
-      type: Type.OBJECT,
-      properties: {
-        norma_culta: competenciaSchema,
-        compreensao_tema: competenciaSchema,
-        argumentacao: competenciaSchema,
-        coesao: competenciaSchema,
-        proposta_intervencao: competenciaSchema
-      },
-      required: ['norma_culta', 'compreensao_tema', 'argumentacao', 'coesao', 'proposta_intervencao']
+      norma_culta: { nota: Math.min(200, 90 + Math.floor(palavras/4)), comentario: 'Correção local emergencial.' },
+      compreensao_tema: { nota: 110, comentario: 'Verifique aderência direta ao tema.' },
+      argumentacao: { nota: 110, comentario: 'Desenvolva repertório e exemplos.' },
+      coesao: { nota: 100, comentario: 'Use conectivos entre os parágrafos.' },
+      proposta_intervencao: { nota: 90, comentario: 'Inclua agente, ação, meio e finalidade.' }
     },
-    erros_ortograficos: { type: Type.ARRAY, items: erroSchema },
-    erros_pontuacao: { type: Type.ARRAY, items: erroSchema },
-    incoerencias: { type: Type.ARRAY, items: { type: Type.STRING } },
-    sugestoes_melhoria: { type: Type.ARRAY, items: { type: Type.STRING } },
-    trechos_reescritos: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          original: { type: Type.STRING },
-          reescrito: { type: Type.STRING },
-          motivo: { type: Type.STRING }
-        },
-        required: ['original', 'reescrito', 'motivo']
-      }
-    }
-  },
-  required: [
-    'nota_total',
-    'diagnostico_geral',
-    'competencias',
-    'erros_ortograficos',
-    'erros_pontuacao',
-    'incoerencias',
-    'sugestoes_melhoria',
-    'trechos_reescritos'
-  ]
-};
-
-function limitarNota(valor, max = 1000) {
-  const n = Number(valor);
-  if (Number.isNaN(n)) return 0;
-  return Math.max(0, Math.min(max, Math.round(n)));
+    diagnostico_geral: 'A IA não respondeu; foi usada correção local.',
+    erros_ortograficos: [], erros_pontuacao: [], incoerencias: [], sugestoes: ['Escreva introdução, desenvolvimento e conclusão.']
+  };
 }
 
-function normalizarResposta(data) {
-  const comps = data.competencias || {};
-  for (const chave of ['norma_culta', 'compreensao_tema', 'argumentacao', 'coesao', 'proposta_intervencao']) {
-    if (!comps[chave]) comps[chave] = { nome: chave, nota: 0, comentario: 'Não avaliado.' };
-    comps[chave].nota = limitarNota(comps[chave].nota, 200);
-  }
-  data.competencias = comps;
-
-  const soma = Object.values(comps).reduce((acc, c) => acc + limitarNota(c.nota, 200), 0);
-  data.nota_total = limitarNota(data.nota_total || soma, 1000);
-
-  data.diagnostico_geral = data.diagnostico_geral || 'Correção concluída.';
-  data.erros_ortograficos = Array.isArray(data.erros_ortograficos) ? data.erros_ortograficos : [];
-  data.erros_pontuacao = Array.isArray(data.erros_pontuacao) ? data.erros_pontuacao : [];
-  data.incoerencias = Array.isArray(data.incoerencias) ? data.incoerencias : [];
-  data.sugestoes_melhoria = Array.isArray(data.sugestoes_melhoria) ? data.sugestoes_melhoria : [];
-  data.trechos_reescritos = Array.isArray(data.trechos_reescritos) ? data.trechos_reescritos : [];
-  return data;
+async function getUserFromToken(req) {
+  const auth = req.headers.authorization || '';
+  const token = auth.replace('Bearer ', '').trim();
+  if (!token || !supabaseAdmin) return null;
+  const { data, error } = await supabaseAdmin.auth.getUser(token);
+  if (error) return null;
+  return data.user;
 }
+
+app.get('/api/health', (req,res)=>res.json({ ok:true, gemini: !!gemini, supabase: !!supabaseAdmin }));
 
 app.post('/api/corrigir-redacao', async (req, res) => {
+  const { tema='', redacao='' } = req.body || {};
+  if (!redacao || redacao.trim().length < 120) return res.status(400).json({ error: 'Texto curto demais.' });
   try {
-    const { tema, redacao } = req.body || {};
-
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: 'GEMINI_API_KEY não configurada no servidor.' });
-    }
-    if (typeof tema !== 'string' || tema.trim().length < 10) {
-      return res.status(400).json({ error: 'Tema inválido.' });
-    }
-    if (typeof redacao !== 'string' || redacao.trim().length < 200) {
-      return res.status(400).json({ error: 'Redação muito curta para correção por IA.' });
-    }
-    if (redacao.length > 12000) {
-      return res.status(413).json({ error: 'Redação muito longa.' });
-    }
-
-    const prompt = `Corrija a redação abaixo como avaliador exigente de concurso público de nível médio para área policial no Brasil.\n\nTema: ${tema}\n\nRedação do aluno:\n${redacao}\n\nCritérios obrigatórios:\n- Dê nota de 0 a 200 para cada competência: norma culta, compreensão do tema, argumentação, coesão e proposta de intervenção.\n- A nota total deve ser a soma das cinco competências, de 0 a 1000.\n- Seja rigoroso, como banca de concurso.\n- Aponte erros reais de ortografia, gramática, pontuação, coesão, incoerência e argumentação.\n- Não invente erros inexistentes.\n- Não reescreva a redação inteira; reescreva no máximo 3 trechos problemáticos.\n- Responda somente em JSON válido, sem markdown.`;
-
-    const response = await ai.models.generateContent({
-      model: MODEL,
-      contents: prompt,
-      config: {
-        temperature: 0.2,
-        responseMimeType: 'application/json',
-        responseSchema: schema,
-        systemInstruction: 'Você é um corretor rigoroso de redações de concursos públicos brasileiros, com foco em PMES e concursos policiais. Responda somente em JSON válido no formato pedido.'
-      }
-    });
-
-    const text = response.text;
-    const data = normalizarResposta(JSON.parse(text));
-    res.json(data);
+    if (!gemini) throw new Error('GEMINI_API_KEY ausente');
+    const prompt = `Você é corretor rigoroso de redação dissertativo-argumentativa para concurso policial de nível médio. Corrija em português do Brasil. Tema: ${tema}\n\nRedação:\n${redacao}\n\nRetorne SOMENTE JSON válido, sem markdown, exatamente neste formato: {"origem":"ia","nota_total":0,"competencias":{"norma_culta":{"nota":0,"comentario":""},"compreensao_tema":{"nota":0,"comentario":""},"argumentacao":{"nota":0,"comentario":""},"coesao":{"nota":0,"comentario":""},"proposta_intervencao":{"nota":0,"comentario":""}},"diagnostico_geral":"","erros_ortograficos":[{"trecho":"","problema":"","sugestao":""}],"erros_pontuacao":[{"trecho":"","problema":"","sugestao":""}],"incoerencias":[{"trecho":"","problema":"","sugestao":""}],"sugestoes":[""]}. Cada competência vale 0 a 200 e a nota_total é a soma.`;
+    const result = await gemini.models.generateContent({ model, contents: prompt });
+    const raw = result.text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(raw);
+    parsed.origem = 'ia';
+    res.json(parsed);
   } catch (err) {
-    console.error('Erro Gemini:', err);
-    res.status(500).json({ error: 'Erro ao corrigir redação com Gemini.' });
+    console.error('Erro IA:', err.message);
+    res.json(localCorrection(redacao, tema));
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`PMES Pro com Gemini rodando em http://localhost:${PORT}`);
+app.post('/api/redacoes', async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) return res.status(401).json({ error: 'Não autenticado' });
+  const { tema, texto, correcao } = req.body || {};
+  const nota = correcao?.nota_total || 0;
+  const { data, error } = await supabaseAdmin.from('redacoes').insert({ user_id: user.id, tema, texto, nota, correcao }).select().single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
 });
+
+app.get('/api/redacoes', async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) return res.status(401).json({ error: 'Não autenticado' });
+  const { data, error } = await supabaseAdmin.from('redacoes').select('*').eq('user_id', user.id).order('created_at', { ascending:false });
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
+app.post('/api/simulados', async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) return res.status(401).json({ error: 'Não autenticado' });
+  const { nota=0, acertos=0, total=0, detalhes={} } = req.body || {};
+  const { data, error } = await supabaseAdmin.from('simulados').insert({ user_id:user.id, nota, acertos, total, detalhes }).select().single();
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
+app.get('/api/simulados', async (req, res) => {
+  const user = await getUserFromToken(req);
+  if (!user) return res.status(401).json({ error: 'Não autenticado' });
+  const { data, error } = await supabaseAdmin.from('simulados').select('*').eq('user_id', user.id).order('created_at', { ascending:false });
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data);
+});
+
+app.listen(PORT, () => console.log(`PMES Pro Área do Aluno rodando na porta ${PORT}`));
