@@ -86,10 +86,41 @@ app.get('/api/redacoes', async (req, res) => {
 
 app.post('/api/simulados', async (req, res) => {
   const user = await getUserFromToken(req);
-  if (!user) return res.status(401).json({ error: 'Não autenticado' });
-  const { nota=0, acertos=0, total=0, detalhes={} } = req.body || {};
-  const { data, error } = await supabaseAdmin.from('simulados').insert({ user_id:user.id, nota, acertos, total, detalhes }).select().single();
-  if (error) return res.status(400).json({ error: error.message });
+
+  if (!user) {
+    return res.status(401).json({ error: 'Não autenticado' });
+  }
+
+  const {
+    titulo = 'Simulado PMES',
+    acertos = 0,
+    total = 0,
+    tempo_segundos = 0,
+    detalhes = {}
+  } = req.body || {};
+
+  const nota_percentual =
+    total > 0 ? Math.round((acertos / total) * 100) : 0;
+
+  const { data, error } = await supabaseAdmin
+    .from('simulados')
+    .insert({
+      user_id: user.id,
+      titulo,
+      total_questoes: total,
+      acertos,
+      nota_percentual,
+      tempo_segundos,
+      detalhes
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Erro ao salvar simulado:', error);
+    return res.status(400).json({ error: error.message });
+  }
+
   res.json(data);
 });
 
